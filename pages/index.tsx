@@ -1,0 +1,42 @@
+import { useEffect, useState } from "react";
+import { ImageData } from "@/interfaces";
+import ImageCard from "@/components/common/ImageCard";
+
+export default function Home() {
+  const [images, setImages] = useState<ImageData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchImages = async () => {
+    try {
+      const response = await fetch("https://picsum.photos/v2/list");
+      if (!response.ok) {
+        throw new Error("Failed to fetch images");
+      }
+
+      const data: ImageData[] = await response.json();
+      setImages(data);
+    } catch (error) {
+      console.error("Error fetching images:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
+
+  if (loading) return <p className="p-4 text-lg">Loading...</p>;
+
+  return (
+    <main className="p-6">
+      <h1 className="text-3xl font-bold mb-6">Random Images</h1>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {images.slice(0, 9).map((image) => (
+          <ImageCard key={image.id} image={image} />
+        ))}
+      </div>
+    </main>
+  );
+}
